@@ -31,7 +31,6 @@ const subjectSchema = new mongoose.Schema({
 //     next();
 // });
 
-subjectSchema.index({ department: 1 }, { unique: true });
 
 export function validateSubject(obj) {
 const schema = Joi.object({

@@ -23,7 +23,7 @@ export const register = async (req, res) => {
         user = new User(req.body);
         await user.save();
 
-        res.status(200).send("A verification code has been sent to your email. Please verify your account using the code.");
+        res.status(200).send("user registered successfully.");
     } catch(error){
         res.status(500).json({message: error.message})
     }

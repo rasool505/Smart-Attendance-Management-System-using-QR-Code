@@ -11,10 +11,6 @@ const attendanceSchema = new mongoose.Schema({
     ref: "Subject",
     required: true
     },
-    sessionId: {
-    type: String,
-    required: true
-    },
     date: {
     type: Date,
     default: Date.now
@@ -31,7 +27,6 @@ export function validateSubject(obj) {
 const schema = Joi.object({
     student: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required(),
     subject: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required(),
-    sessionId: Joi.string().trim().required(),
     status: Joi.valid("present", "absent", "late").default("present").required(),
 });
 

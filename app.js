@@ -7,6 +7,7 @@ import {notFound, errorHandler} from "./middlewares/errors.js";
 import { connectDB } from "./config/db.js";
 import authRouter from "./routes/authRoutes.js";
 import attendanceRouter from "./routes/attendanceRoutes.js";
+import subjectRouter from "./routes/subjectRoutes.js";
 
 
 
@@ -32,6 +33,7 @@ app.use(cors())
 //Routes
 app.use("/api/auth", authRouter);
 app.use("/api/attendance", attendanceRouter);
+app.use("/api/subject", subjectRouter);
 
 
 // Error middlawere

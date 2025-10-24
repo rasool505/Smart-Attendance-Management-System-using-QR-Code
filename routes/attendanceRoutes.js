@@ -1,8 +1,8 @@
 import express from "express";
-import { markAttendance } from "../controllers/attendanceController.js";
+import { markAttendance, generateQRToken } from "../controllers/attendanceController.js";
 const route = express.Router();
-// /api/attendance/generate-token
-route.post("/generate-token", markAttendance);
+// /api/attendance/generate-token/:id
+route.post("/generate-token/:id", generateQRToken);
 // /api/attendance/mark
-route.post("/mark", markAttendance);
+route.post("/mark/:id", markAttendance);
 export default route;
