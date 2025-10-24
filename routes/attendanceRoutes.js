@@ -4,5 +4,5 @@ const route = express.Router();
 // /api/attendance/generate-token/:id
 route.post("/generate-token/:id", generateQRToken);
 // /api/attendance/mark
-route.post("/mark/:id", markAttendance);
+route.post("/mark", markAttendance);
 export default route;

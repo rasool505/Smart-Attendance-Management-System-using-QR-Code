@@ -13,7 +13,7 @@ dotenv.config();
  */
 export const generateQRToken = async (req, res) => {
     try {
-    const subjectId = req.params.id;
+    const subjectId = req.params.id; // get subject id from params
     const userId = req.body.userId;
 
     const user = await User.findById(userId);
@@ -40,14 +40,13 @@ export const generateQRToken = async (req, res) => {
 
 /**
  *  @desc Mark Attendance
- *  @route /api/attendance/mark/:id
+ *  @route /api/attendance/mark
  *  @method POST
  *  @access public
  */
 export const markAttendance = async (req, res) => {
     try {
-        const { token } = req.body;
-        const userId = req.params.id;
+        const { token, userId } = req.body;
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
         const { subjectId } = decoded;
