@@ -88,12 +88,6 @@ export const markAttendance = async (req, res) => {
         if (!student || student.role !== 1)
             return res.status(403).send({ message: "Only students can mark attendance" });
 
-        // check if attendance already marked today
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
-        const todayEnd = new Date();
-        todayEnd.setHours(23, 59, 59, 999);
-
         //check if attendance record exists for today
         const exists = await Attendance.findById(attendanceId);
 
