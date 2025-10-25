@@ -1,11 +1,6 @@
 import mongoose from "mongoose";
 
 const attendanceSchema = new mongoose.Schema({
-    student: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true
-    },
     subject: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Subject",
@@ -15,19 +10,32 @@ const attendanceSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
     },
-    status: {
-    type: String,
-    enum: ["present", "leave"],
-    default: "present"
+    students: [
+    {
+        student: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+        },
+        status: {
+        type: String,
+        enum: ["present", "leave","absent"],
+        default: "absent"
+        },
     },
+    ],
 }, { timestamps: true });
 
 
 export function validateSubject(obj) {
 const schema = Joi.object({
-    student: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required(),
     subject: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required(),
+    students: Joi.array().items(
+    Joi.object({
+    student: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required(),
     status: Joi.valid("present", "leave").default("present").required(),
+    })
+    ).min(1).required(),
 });
 
 return schema.validate(obj);

@@ -21,10 +21,42 @@ export const generateQRSession = async (req, res) => {
     if (!user || user.role !== 2)
         return res.status(403).json({ message: "Only instructors can generate QR sessions" });
 
+    // check if attendance already marked today
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const todayEnd = new Date();
+        todayEnd.setHours(23, 59, 59, 999);
+
+        //check if attendance record exists for today
+        const exists = await Attendance.findOne({
+            subject: subjectId,
+            date: { $gte: todayStart, $lte: todayEnd }
+        });
+        if (exists) {
+        return res.status(400).json({ message: "Attendance has already been marked for today" });
+        }
+
+        const getAllStudents = await User.find({ subjects: subjectId }); // get all students
+        const students = getAllStudents.map(s =>(
+        {
+            student: s._id,
+            status: "absent",
+
+        }
+        ));
+
+    // create new attendance record
+    const attendance = new Attendance({
+        subject: subjectId,
+        students: students
+    });
+    await attendance.save();
+
+    // generate JWT token
     const session = jwt.sign(
         {
-        subjectId,
         instructorId: userId,
+        attendanceId: attendance._id,
         exp: Math.floor(Date.now() / 1000) + 10 * 60,
         },
         process.env.JWT_SECRET_KEY
@@ -49,7 +81,7 @@ export const markAttendance = async (req, res) => {
         const { session, userId } = req.body;
 
         const decoded = jwt.verify(session, process.env.JWT_SECRET_KEY);
-        const { subjectId } = decoded;
+        const { attendanceId } = decoded;
         
         // check if user is student
         const student = await User.findById(userId);
@@ -59,27 +91,28 @@ export const markAttendance = async (req, res) => {
         // check if attendance already marked today
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
-
         const todayEnd = new Date();
         todayEnd.setHours(23, 59, 59, 999);
 
-        const exists = await Attendance.findOne({
-            student: student._id,
-            subject: subjectId,
-            date: { $gte: todayStart, $lte: todayEnd }
-        });
-        if (exists) return res.status(400).send({ message: "Already marked" });
+        //check if attendance record exists for today
+        const exists = await Attendance.findById(attendanceId);
 
-        // mark attendance
-        const attendance = new Attendance({
-            student: student._id,
-            subject: subjectId,
-            status: "present"
-        });
+        // mark student in attendance
+        if (exists){
+            // add student to existing attendance record
+            const studentRecord = exists.students.find(s => s.student.toString() === userId);
+            if (!studentRecord)
+                return res.status(404).send({ message: "Student not found in attendance record" });
 
-        await attendance.save();
+            if (studentRecord.status === "present" || studentRecord.status === "leave") {
+                return res.status(200).send({ message: "Attendance already marked for today" });
+            }
 
-        res.status(200).send({ message: "Attendance marked successfully" });
+            studentRecord.status = "present";
+            await exists.save();
+            return res.status(200).send({ message: "Attendance marked successfully" });
+        }
+
     } catch (error) {
         res.status(400).send({ message: "Invalid or expired QR code" });
     }

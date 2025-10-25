@@ -1,11 +1,10 @@
 import express from "express";
-import { getStudentSubjectMonthlyReport, getMonthlyReport } from "../controllers/reportController.js";
+import { getMonthlyReport0 } from "../controllers/reportController.js";
 
 const router = express.Router();
 
 //GET /api/reports?subjectId=39e4t2&month=10&year=2025
-router.get("/", getMonthlyReport);
-//GET /api/reports/monthly?subjectId=68fb1e3&subjectId=39e4t2&month=10&year=2025
-router.get("/monthly", getStudentSubjectMonthlyReport);
+router.get("/", getMonthlyReport0);
+
 
 export default router;
