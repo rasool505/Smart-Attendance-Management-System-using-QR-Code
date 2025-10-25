@@ -8,7 +8,7 @@ import { connectDB } from "./config/db.js";
 import authRouter from "./routes/authRoutes.js";
 import attendanceRouter from "./routes/attendanceRoutes.js";
 import subjectRouter from "./routes/subjectRoutes.js";
-
+import reportRouter from "./routes/reportRoutes.js";
 
 
 // init env
@@ -34,6 +34,7 @@ app.use(cors())
 app.use("/api/auth", authRouter);
 app.use("/api/attendance", attendanceRouter);
 app.use("/api/subject", subjectRouter);
+app.use("/api/reports", reportRouter);
 
 
 // Error middlawere

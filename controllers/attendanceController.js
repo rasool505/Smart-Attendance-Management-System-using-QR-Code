@@ -7,11 +7,11 @@ dotenv.config();
 
 /**
  *  @desc Generate QR Token
- *  @route /api/attendance/generate-token/:id
+ *  @route /api/attendance/generate-session/:id
  *  @method POST
  *  @access public
  */
-export const generateQRToken = async (req, res) => {
+export const generateQRSession = async (req, res) => {
     try {
     const subjectId = req.params.id; // get subject id from params
     const userId = req.body.userId;
@@ -19,9 +19,9 @@ export const generateQRToken = async (req, res) => {
     const user = await User.findById(userId);
     // check if user is instructor
     if (!user || user.role !== 2)
-        return res.status(403).json({ message: "Only instructors can generate QR tokens" });
+        return res.status(403).json({ message: "Only instructors can generate QR sessions" });
 
-    const token = jwt.sign(
+    const session = jwt.sign(
         {
         subjectId,
         instructorId: userId,
@@ -30,7 +30,7 @@ export const generateQRToken = async (req, res) => {
         process.env.JWT_SECRET_KEY
     );
 
-    res.status(200).json({ token });
+    res.status(200).json({ session });
     } catch (error) {
     res.status(500).json({ message: error.message });
     }
@@ -46,9 +46,9 @@ export const generateQRToken = async (req, res) => {
  */
 export const markAttendance = async (req, res) => {
     try {
-        const { token, userId } = req.body;
+        const { session, userId } = req.body;
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        const decoded = jwt.verify(session, process.env.JWT_SECRET_KEY);
         const { subjectId } = decoded;
         
         // check if user is student

@@ -17,7 +17,7 @@ const attendanceSchema = new mongoose.Schema({
     },
     status: {
     type: String,
-    enum: ["present", "absent", "late"],
+    enum: ["present", "absent"],
     default: "present"
     },
 }, { timestamps: true });
@@ -27,7 +27,7 @@ export function validateSubject(obj) {
 const schema = Joi.object({
     student: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required(),
     subject: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required(),
-    status: Joi.valid("present", "absent", "late").default("present").required(),
+    status: Joi.valid("present", "absent").default("present").required(),
 });
 
 return schema.validate(obj);
