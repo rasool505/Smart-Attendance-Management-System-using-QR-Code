@@ -1,11 +1,12 @@
 import express from "express";
-import { AddUser, deleteUser, getAllUsers, getUserById, updateUser } from "../controllers/usersController.js";
+import { AddUser, deleteUser, getAllInstructors, getAllStudents, getUserById, updateUser } from "../controllers/usersController.js";
 import { verifyAdminToken } from "../middlewares/verifyToken.js";
 
 const route = express.Router();
 
 // /api/users
-route.get("/", verifyAdminToken, getAllUsers);
+route.get("/students", verifyAdminToken, getAllStudents);
+route.get("/instructors", verifyAdminToken, getAllInstructors);
 route.post("/", verifyAdminToken, AddUser);
 
 // /api/users/:id

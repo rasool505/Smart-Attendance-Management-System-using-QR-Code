@@ -3,14 +3,32 @@ import User, { validateAddUser, validateUpdateUser } from "../models/User.js"
 
 
 /**
- *  @desc Get all users
- *  @route /api/users
+ *  @desc Get all students
+ *  @route /api/users/students
  *  @method GET
  *  @access private (only admin)
  */
-export const getAllUsers = async (req, res)=>{
+export const getAllStudents = async (req, res)=>{
     try{
-        const users = await User.find();
+        const users = await User.find({role: 1}).select('-otp -createdAt -updatedAt -subjects -__v');
+        if (!users || users.length === 0)
+            return res.status(404).json({message: "users is not found"})
+
+        res.status(200).json(users)
+    } catch(error){
+        res.status(400).json({message: error.message})
+    }
+}
+
+/**
+ *  @desc Get all instructors
+ *  @route /api/users/instructors
+ *  @method GET
+ *  @access private (only admin)
+ */
+export const getAllInstructors = async (req, res)=>{
+    try{
+        const users = await User.find({role: 2}).select('-otp -createdAt -updatedAt -subjects -__v');
         if (!users || users.length === 0)
             return res.status(404).json({message: "users is not found"})
 

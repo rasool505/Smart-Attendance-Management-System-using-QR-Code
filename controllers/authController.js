@@ -1,4 +1,4 @@
-import User, {validateRegisterUser, validateOTP, validateLogin} from "../models/User.js";
+import User, { validateOTP, validateLogin} from "../models/User.js";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 dotenv.config();
