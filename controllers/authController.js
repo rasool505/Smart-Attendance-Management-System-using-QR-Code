@@ -3,31 +3,6 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 dotenv.config();
 
-/**
- * @desc Register
- * @route /api/auth/register
- * @method POST
- * @access public 
- */
-export const register = async (req, res) => {
-    const {error} = validateRegisterUser(req.body)
-    if(error)
-        return res.status(400).json({message: error.details[0].message})
-
-    try{
-
-        let user = await User.findOne({email: req.body.email})
-        if(user)
-            return res.status(400).json({message: 'this is user already registered'})
-        
-        user = new User(req.body);
-        await user.save();
-
-        res.status(200).send("user registered successfully.");
-    } catch(error){
-        res.status(500).json({message: error.message})
-    }
-}
 
 /**
  * @desc verify OTP
@@ -38,39 +13,39 @@ export const register = async (req, res) => {
 export const verifyOTP = async (req, res) => {
     try {
     const { error } = validateOTP(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+    if (error) return res.status(400).json(error.details[0].message);
 
     const { email, code } = req.body;
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).send("user not found.");
+    if (!user) return res.status(404).json({message: "user not found."});
 
     if (!user.otp || !user.otp.code)
-        return res.status(400).send("no OTP code found. Please request a new one.");
+        return res.status(400).json({message: "no OTP code found. Please request a new one."});
 
     if (new Date() > user.otp.expiresAt){
         user.otp = undefined; // نحذف الكود
         await user.save();
-        return res.status(400).send("expired OTP code. Please request a new one.");
+        return res.status(400).json({message: "expired OTP code. Please request a new one."});
     }
     const maxAttempts = 5; // maximum number of allowed attempts
     if (user.otp.attempts >= maxAttempts){
             user.otp = undefined; // نحذف الكود
             await user.save();
-            return res.status(400).send("too many incorrect attempts. Please request a new OTP code.");
+            return res.status(400).json({message: "too many incorrect attempts. Please request a new OTP code."});
     }
 
     if (user.otp.code !== code) {
         user.otp.attempts += 1;
         await user.save();
-        return res.status(400).send("invalid OTP code.");
+        return res.status(400).json({message: "invalid OTP code."});
     }
 
     user.otp = undefined; // نحذف الكود
     await user.save();
     const token = user.generateToken(req.ip);
-    res.status(200).send({message: "your account has been verified successfully.", token: token});
+    res.status(200).json({message: "your account has been verified successfully.", userId: user._id, userRole: user.role, token: token});
     } catch (error) {
-    res.status(500).send({message: error.message});
+    res.status(500).json({message: error.message});
     }
 }
 
@@ -106,22 +81,22 @@ export const login = async (req, res)=>{
         await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: user.email,
-        subject: "OTP code for account verification",
+        subject: "Your Security Code",
         html: `
-        <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 30px;">
-        <div style="max-width: 400px; margin: auto; background: white; border-radius: 10px; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <h2 style="color: #0f57ffff;">رمز التحقق (OTP)</h2>
-            <p style="font-size: 16px; color: #333;">استخدم هذا الرمز لتأكيد تسجيل الدخول:</p>
-            <div style="font-size: 32px; letter-spacing: 8px; font-weight: bold; margin: 20px 0; color: #000;">
-            ${otpCode}
-            </div>
-            <p style="color: #888;">الرمز صالح لمدة 2 دقائق فقط.</p>
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #eef1f6; padding: 40px;">
+        <div style="max-width: 420px; margin: auto; background: #fff; border-radius: 14px; padding: 25px 30px; text-align: center; box-shadow: 0 6px 20px rgba(0,0,0,0.08);">
+        <h2 style="color: #0f57ff; font-size: 22px; margin-bottom: 15px;">رمز التحقق الأمني</h2>
+        <p style="font-size: 15px; color: #444; margin-bottom: 20px;">يرجى استخدام الرمز أدناه لإتمام عملية تسجيل الدخول الخاصة بك:</p>
+        <div style="font-size: 34px; letter-spacing: 10px; font-weight: bold; margin: 25px 0; color: #0f57ff; background-color: #f1f5ff; padding: 10px 0; border-radius: 8px;">
+        ${otpCode}
+        </div>
+        <p style="color: #777; font-size: 14px;">هذا الرمز صالح لمدة <strong>دقيقتين</strong> فقط، يرجى عدم مشاركته مع أي شخص.</p>
         </div>
         </div>
         `,
         });
 
-        res.status(200).send("A verification code has been sent to your email. Please verify your account using the code.");
+        res.status(200).json({message: "A verification code has been sent to your email. Please verify your account using the code."});
     } catch(error){
         res.status(500).json({message: error.message});
     }

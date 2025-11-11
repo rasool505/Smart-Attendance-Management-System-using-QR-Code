@@ -86,7 +86,7 @@ export const markAttendance = async (req, res) => {
         // check if user is student
         const student = await User.findById(userId);
         if (!student || student.role !== 1)
-            return res.status(403).send({ message: "Only students can mark attendance" });
+            return res.status(403).json({ message: "Only students can mark attendance" });
 
         //check if attendance record exists for today
         const exists = await Attendance.findById(attendanceId);
@@ -96,18 +96,61 @@ export const markAttendance = async (req, res) => {
             // add student to existing attendance record
             const studentRecord = exists.students.find(s => s.student.toString() === userId);
             if (!studentRecord)
-                return res.status(404).send({ message: "Student not found in attendance record" });
+                return res.status(404).json({ message: "Student not found in attendance record" });
 
             if (studentRecord.status === "present" || studentRecord.status === "leave") {
-                return res.status(200).send({ message: "Attendance already marked for today" });
+                return res.status(200).json({ message: "Attendance already marked for today" });
             }
 
             studentRecord.status = "present";
             await exists.save();
-            return res.status(200).send({ message: "Attendance marked successfully" });
+            return res.status(200).json({ message: "Attendance marked successfully" });
         }
 
     } catch (error) {
-        res.status(400).send({ message: "Invalid or expired QR code" });
+        res.status(400).json({ message: "Invalid or expired QR code" });
+    }
+};
+
+
+/**
+ *  @desc Mark Attendance
+ *  @route /api/attendance/mark/leave
+ *  @method POST
+ *  @access public
+ */
+export const markAttendanceForLeave = async (req, res) => {
+    try {
+        const { session, userId } = req.body;
+
+        const decoded = jwt.verify(session, process.env.JWT_SECRET_KEY);
+        const { attendanceId } = decoded;
+        
+        // check if user is student
+        const student = await User.findById(userId);
+        if (!student || student.role !== 1)
+            return res.status(403).json({ message: "Only student can mark this attendance" });
+
+        //check if attendance record exists for today
+        const exists = await Attendance.findById(attendanceId);
+
+        // mark student in attendance
+        if (exists){
+            // add student to existing attendance record
+            const studentRecord = exists.students.find(s => s.student.toString() === userId);
+            if (!studentRecord)
+                return res.status(404).json({ message: "Student not found in attendance record" });
+
+            if (studentRecord.status === "present" || studentRecord.status === "leave") {
+                return res.status(200).json({ message: "Attendance already marked for today" });
+            }
+
+            studentRecord.status = "leave";
+            await exists.save();
+            return res.status(200).json({ message: "Attendance marked successfully" });
+        }
+
+    } catch (error) {
+        res.status(400).json({ message: "Invalid or expired QR code" });
     }
 };

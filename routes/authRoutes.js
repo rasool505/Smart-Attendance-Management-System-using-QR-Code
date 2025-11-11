@@ -1,11 +1,7 @@
 import express from "express";
-import { login, register, verifyOTP } from "../controllers/authController.js";
-import { verifyAdminToken } from "../middlewares/verifyToken.js";
+import { login, verifyOTP } from "../controllers/authController.js";
 
 const route = express.Router();
-
-// /api/users/register
-route.post("/register", verifyAdminToken, register)
 
 // /api/users/login
 route.post("/login", login)

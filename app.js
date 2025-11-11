@@ -9,7 +9,7 @@ import authRouter from "./routes/authRoutes.js";
 import attendanceRouter from "./routes/attendanceRoutes.js";
 import subjectRouter from "./routes/subjectRoutes.js";
 import reportRouter from "./routes/reportRoutes.js";
-
+import userRouter from "./routes/userRoutes.js";
 
 // init env
 dotenv.config();
@@ -20,6 +20,9 @@ connectDB();
 // init app
 const app = express();
 
+// Cores policy
+app.use(cors())
+
 // Apply middlaweres
 app.use(express.json());
 app.use(logger);
@@ -27,14 +30,12 @@ app.use(logger);
 // Helmet
 app.use(helmet());
 
-// Cores policy
-app.use(cors())
-
 //Routes
 app.use("/api/auth", authRouter);
 app.use("/api/attendance", attendanceRouter);
 app.use("/api/subject", subjectRouter);
 app.use("/api/reports", reportRouter);
+app.use("/api/users", userRouter);
 
 
 // Error middlawere

@@ -43,10 +43,6 @@ const userSchema = mongoose.Schema({
         maxlength: 200,
         trim: true
     },
-    isActive: {
-        type: Boolean,
-        default: true
-    }
 }, {timestamps: true})
 
 
@@ -59,15 +55,23 @@ userSchema.methods.generateToken = function(ipAddress){
 
 const User = mongoose.model("User", userSchema);
 
-export function validateRegisterUser(obj){
+export function validateAddUser(obj){
     const schema = Joi.object({
     name: Joi.string().trim().min(3).max(50).required(),
     email: Joi.string().trim().min(10).max(100).required(),
     role: Joi.valid(1, 2).default(1).required(),
     stage: Joi.string().when('role', { is: 1, then: Joi.required(), otherwise: Joi.optional() }),
     department: Joi.string().trim().min(10).max(200).optional(),
-    subjects: Joi.array().items(Joi.string().pattern(/^[0-9a-fA-F]{24}$/)),
-    isActive: Joi.boolean().default(true),
+    })
+    return schema.validate(obj)
+}
+
+export function validateUpdateUser(obj){
+    const schema = Joi.object({
+    name: Joi.string().trim().min(3).max(50).optional(),
+    email: Joi.string().trim().min(10).max(100).optional(),
+    stage: Joi.string().when('role', { is: 1, then: Joi.required(), otherwise: Joi.optional() }),
+    department: Joi.string().trim().min(10).max(200).optional(),
     })
     return schema.validate(obj)
 }

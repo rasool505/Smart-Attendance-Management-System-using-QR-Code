@@ -1,7 +1,49 @@
 import Subject from "../models/Subject.js";
+import User from "../models/User.js";
 import { validateSubject } from "../models/Subject.js";
 
 
+
+
+
+
+
+
+/**
+ * @route /api/subject
+ * @method GET
+ * @access protected 
+ */
+export const getAllSubjects = async (req, res) => {
+    try{
+
+        let subjects = await Subject.find();
+        if(!subjects)
+            return res.status(404).json({message: 'Subjects Is Not Found'})
+
+        res.status(200).json(subjects);
+    } catch(error){
+        res.status(500).json({message: error.message})
+    }
+}
+
+
+/**
+ * @route /api/subject/instructor/:id
+ * @method GET
+ * @access protected 
+ */
+export const getAllSubjectsOfInstructor = async (req, res) => {
+    try{
+        let subjects = await Subject.find({instructor: req.params.id});
+        if(!subjects)
+            return res.status(404).json({message: 'Subjects Is Not Found'})
+
+        res.status(200).json(subjects);
+    } catch(error){
+        res.status(500).json({message: error.message})
+    }
+}
 
 /**
  * @desc add new subject
@@ -28,7 +70,7 @@ export const addSubject = async (req, res) => {
         subject = new Subject(req.body);
         await subject.save();
 
-        res.status(200).send("subjec successfully added.");
+        res.status(201).json("subjec successfully added.");
     } catch(error){
         res.status(500).json({message: error.message})
     }
@@ -53,3 +95,34 @@ export const deleteSubject = async (req, res) => {
         res.status(500).json({message: error.message})
     }
 }
+
+
+/**
+ * @route /api/subject/assignedToAllStudents
+ * @method PATCH
+ * @access protected 
+ */
+export const StudentsAssignedToSubject = async (req, res) => {
+    try {
+        const subjects = await Subject.find();
+        if (!subjects || subjects.length === 0)
+            return res.status(400).json({ message: 'No subjects found.' });
+        const students = await User.find({ role: '1' });
+        for (let student of students) {
+            const matchedSubjects = subjects.filter(subj =>
+                subj.department === student.department &&
+                subj.stage === student.stage
+            );
+            for (let subject of matchedSubjects) {
+                if (!student.subjects.includes(subject._id)) {
+                    student.subjects.push(subject._id);
+                }
+            }
+            await student.save();
+        }
+        res.status(200).json({ message: 'Subjects assigned to students successfully.' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
