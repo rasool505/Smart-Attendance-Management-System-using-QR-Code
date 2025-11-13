@@ -17,7 +17,7 @@ import { validateSubject } from "../models/Subject.js";
 export const getAllSubjects = async (req, res) => {
     try{
 
-        let subjects = await Subject.find();
+        let subjects = await Subject.find().populate("instructor", "name");
         if(!subjects)
             return res.status(404).json({message: 'Subjects Is Not Found'})
 

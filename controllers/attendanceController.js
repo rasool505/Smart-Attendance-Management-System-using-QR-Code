@@ -37,6 +37,9 @@ export const generateQRSession = async (req, res) => {
         }
 
         const getAllStudents = await User.find({ subjects: subjectId }); // get all students
+        if (getAllStudents.length === 0) {
+            return res.status(404).json({ message: "No students found for this subject" });
+        }
         const students = getAllStudents.map(s =>(
         {
             student: s._id,
